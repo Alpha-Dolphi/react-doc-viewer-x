@@ -1,4 +1,4 @@
-import { Dispatch, useContext, useEffect } from "react";
+import { Dispatch, useContext, useEffect, useState } from "react";
 import { DocViewerContext } from "../store/DocViewerProvider";
 import {
   MainStateActions,
@@ -23,7 +23,8 @@ export const useDocumentLoader = (): {
   CurrentRenderer: DocRenderer | null | undefined;
 } => {
   const { state, dispatch } = useContext(DocViewerContext);
-  const { currentFileNo, currentDocument } = state;
+  const { currentFileNo, currentDocument, prefetchMethod } = state;
+  const [fileTypeLoaded, setFileTypeLoaded] = useState(false);
 
   const { CurrentRenderer } = useRendererSelector();
 
@@ -31,17 +32,49 @@ export const useDocumentLoader = (): {
 
   useEffect(
     () => {
-      if (!currentDocument || currentDocument.fileType !== undefined) return;
+      if (fileTypeLoaded || !currentDocument || currentDocument.fileType !== undefined) return;
 
+      const controller = new AbortController();
+      const { signal } = controller;
 
-      updateCurrentDocument({
-        ...currentDocument,
-        fileType: 'application/octet-stream',
+      fetch(documentURI, {
+        method:
+          prefetchMethod || documentURI.startsWith("blob:") ? "GET" : "HEAD",
+        signal,
+        headers: state?.requestHeaders,
       })
+        .then((response) => {
+          const contentTypeRaw = response.headers.get("content-type");
+          const contentTypes = contentTypeRaw?.split(";") || [];
+          const contentType = contentTypes.length ? contentTypes[0] : undefined;
+
+          dispatch(
+            updateCurrentDocument({
+              ...currentDocument,
+              fileType: contentType || undefined,
+            }),
+          );
+        })
+        .catch((error) => {
+          if (error?.name !== "AbortError") {
+            throw error;
+          }
+        })
+        .finally(() => {
+          setFileTypeLoaded(true);
+        });
+
+      return () => {
+        controller.abort();
+      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentFileNo, documentURI],
+    [currentFileNo, documentURI, currentDocument, fileTypeLoaded],
   );
+
+  useEffect(() => {
+    setFileTypeLoaded(false);
+  }, [currentFileNo]);
 
   useEffect(() => {
     if (!currentDocument || CurrentRenderer === undefined) return;
