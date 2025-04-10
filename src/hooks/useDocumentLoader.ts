@@ -29,6 +29,20 @@ export const useDocumentLoader = (): {
 
   const documentURI = currentDocument?.uri || "";
 
+  useEffect(
+    () => {
+      if (!currentDocument || currentDocument.fileType !== undefined) return;
+
+
+      updateCurrentDocument({
+        ...currentDocument,
+        fileType: 'application/octet-stream',
+      })
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentFileNo, documentURI],
+  );
+
   useEffect(() => {
     if (!currentDocument || CurrentRenderer === undefined) return;
 
