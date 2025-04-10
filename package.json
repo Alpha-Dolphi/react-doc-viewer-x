@@ -23,8 +23,8 @@
   "module": "./dist/react-doc-viewer.js",
   "exports": {
     ".": {
-      "import": "./dist/react-doc-viewer.js",
-      "require": "./dist/react-doc-viewer.cjs",
+      "import": "./dist/react-doc-viewer-x.js",
+      "require": "./dist/react-doc-viewer-x.cjs",
       "types": "./dist/index.d.ts"
     },
     "./dist/index.css": {
