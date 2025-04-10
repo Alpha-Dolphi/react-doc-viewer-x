@@ -1,6 +1,6 @@
 {
-  "name": "@cyntler/react-doc-viewer",
-  "version": "1.17.0",
+  "name": "@cyntler/react-doc-viewer-x",
+  "version": "1.17.1",
   "description": "File viewer for React.",
   "author": "Matthew Mogford / Damian Cyntler",
   "type": "module",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "start": "storybook dev -p 6006",
-    "build": "rm -rf dist && tsc && vite build",
+    "build": "tsc && vite build",
     "test": "vitest run",
     "lint": "eslint ./src --ext .ts,.tsx",
     "prettier:check": "prettier --check .",
