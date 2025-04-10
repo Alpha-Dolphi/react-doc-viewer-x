@@ -62,6 +62,7 @@ export const useDocumentLoader = (): {
         })
         .finally(() => {
           setFileTypeLoaded(true);
+          console.log('1setFileTypeLoaded(true);');
         });
 
       return () => {
@@ -73,9 +74,12 @@ export const useDocumentLoader = (): {
   );
 
   useEffect(() => {
+    console.log('documentURI = ', documentURI);
+    console.log('2setFileTypeLoaded(false);');
     setFileTypeLoaded(false);
 
     return () => {
+      console.log('3setFileTypeLoaded(false);');
       setFileTypeLoaded(false);
     }
   }, [currentFileNo, documentURI]);
@@ -85,8 +89,11 @@ export const useDocumentLoader = (): {
 
     const controller = new AbortController();
     const { signal } = controller;
+    setFileTypeLoaded(false);
+    console.log('5setFileTypeLoaded(false);');
 
     const fileLoaderComplete: FileLoaderComplete = (fileReader) => {
+      console.log('4setFileTypeLoaded(false);');
       setFileTypeLoaded(false);
 
       if (!currentDocument || !fileReader) {
