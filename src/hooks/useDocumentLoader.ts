@@ -87,6 +87,8 @@ export const useDocumentLoader = (): {
     const { signal } = controller;
 
     const fileLoaderComplete: FileLoaderComplete = (fileReader) => {
+      setFileTypeLoaded(false);
+
       if (!currentDocument || !fileReader) {
         dispatch(setDocumentLoading(false));
         return;
