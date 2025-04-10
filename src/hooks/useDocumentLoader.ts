@@ -74,7 +74,11 @@ export const useDocumentLoader = (): {
 
   useEffect(() => {
     setFileTypeLoaded(false);
-  }, [currentFileNo]);
+
+    return () => {
+      setFileTypeLoaded(false);
+    }
+  }, [currentFileNo, documentURI]);
 
   useEffect(() => {
     if (!currentDocument || CurrentRenderer === undefined) return;
