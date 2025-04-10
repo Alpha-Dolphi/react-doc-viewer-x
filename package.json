@@ -1,6 +1,6 @@
 {
   "name": "react-doc-viewer-x",
-  "version": "1.17.7",
+  "version": "1.17.8",
   "description": "File viewer for React.",
   "author": "Matthew Mogford / Damian Cyntler",
   "type": "module",

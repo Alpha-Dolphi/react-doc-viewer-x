@@ -1,4 +1,4 @@
-import { Dispatch, useContext, useEffect, useState } from "react";
+import { Dispatch, useContext, useEffect } from "react";
 import { DocViewerContext } from "../store/DocViewerProvider";
 import {
   MainStateActions,
@@ -24,64 +24,50 @@ export const useDocumentLoader = (): {
 } => {
   const { state, dispatch } = useContext(DocViewerContext);
   const { currentFileNo, currentDocument, prefetchMethod } = state;
-  const [fileTypeLoaded, setFileTypeLoaded] = useState(false);
 
   const { CurrentRenderer } = useRendererSelector();
 
   const documentURI = currentDocument?.uri || "";
 
-  useEffect(
-    () => {
-      if (fileTypeLoaded || !currentDocument || currentDocument.fileType !== undefined) return;
+  useEffect(() => {
+    if (!currentDocument || currentDocument.fileType !== undefined) return;
 
-      const controller = new AbortController();
-      const { signal } = controller;
+    const controller = new AbortController();
+    const { signal } = controller;
 
-      fetch(documentURI, {
-        method:
-          prefetchMethod || documentURI.startsWith("blob:") ? "GET" : "HEAD",
-        signal,
-        headers: state?.requestHeaders,
-      })
-        .then((response) => {
-          const contentTypeRaw = response.headers.get("content-type");
-          const contentTypes = contentTypeRaw?.split(";") || [];
-          const contentType = contentTypes.length ? contentTypes[0] : undefined;
+    fetch(documentURI, {
+      method: prefetchMethod || documentURI.startsWith("blob:") ? "GET" : "HEAD",
+      signal,
+      headers: state?.requestHeaders,
+    })
+      .then((response) => {
+        const contentTypeRaw = response.headers.get("content-type");
+        const contentTypes = contentTypeRaw?.split(";") || [];
+        const contentType = contentTypes.length ? contentTypes[0] : undefined;
 
+        if (contentType) {
           dispatch(
             updateCurrentDocument({
               ...currentDocument,
-              fileType: contentType || undefined,
+              fileType: contentType || "application/octet-stream",
             }),
           );
-        })
-        .catch((error) => {
-          if (error?.name !== "AbortError") {
-            throw error;
-          }
-        })
-        .finally(() => {
-          setFileTypeLoaded(true);
-          console.log('1setFileTypeLoaded(true);');
-        });
-
-      return () => {
-        controller.abort();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentFileNo, documentURI, currentDocument, fileTypeLoaded],
-  );
-
-  useEffect(() => {
-    console.log('documentURI = ', documentURI);
-    console.log('2setFileTypeLoaded(false);');
-    setFileTypeLoaded(false);
+        }
+      })
+      .catch((error) => {
+        if (error?.name !== "AbortError") {
+          dispatch(
+            updateCurrentDocument({
+              ...currentDocument,
+              fileType: "application/octet-stream",
+            }),
+          );
+        }
+      });
 
     return () => {
-      console.log('3setFileTypeLoaded(false);');
-      setFileTypeLoaded(false);
-    }
+      controller.abort();
+    };
   }, [currentFileNo, documentURI]);
 
   useEffect(() => {
@@ -89,13 +75,8 @@ export const useDocumentLoader = (): {
 
     const controller = new AbortController();
     const { signal } = controller;
-    setFileTypeLoaded(false);
-    console.log('5setFileTypeLoaded(false);');
 
     const fileLoaderComplete: FileLoaderComplete = (fileReader) => {
-      console.log('4setFileTypeLoaded(false);');
-      setFileTypeLoaded(false);
-
       if (!currentDocument || !fileReader) {
         dispatch(setDocumentLoading(false));
         return;
@@ -128,7 +109,6 @@ export const useDocumentLoader = (): {
     return () => {
       controller.abort();
     };
-    /* eslint-disable react-hooks/exhaustive-deps */
   }, [CurrentRenderer, currentFileNo]);
 
   return { state, dispatch, CurrentRenderer };
