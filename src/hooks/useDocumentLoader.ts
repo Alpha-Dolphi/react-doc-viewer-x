@@ -23,7 +23,7 @@ export const useDocumentLoader = (): {
   CurrentRenderer: DocRenderer | null | undefined;
 } => {
   const { state, dispatch } = useContext(DocViewerContext);
-  const { currentFileNo, currentDocument, prefetchMethod } = state;
+  const { currentFileNo, currentDocument } = state;
 
   const { CurrentRenderer } = useRendererSelector();
 
