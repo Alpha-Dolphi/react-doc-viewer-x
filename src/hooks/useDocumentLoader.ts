@@ -29,45 +29,6 @@ export const useDocumentLoader = (): {
 
   const documentURI = currentDocument?.uri || "";
 
-  useEffect(
-    () => {
-      if (!currentDocument || currentDocument.fileType !== undefined) return;
-
-      const controller = new AbortController();
-      const { signal } = controller;
-
-      fetch(documentURI, {
-        method:
-          prefetchMethod || documentURI.startsWith("blob:") ? "GET" : "HEAD",
-        signal,
-        headers: state?.requestHeaders,
-      })
-        .then((response) => {
-          const contentTypeRaw = response.headers.get("content-type");
-          const contentTypes = contentTypeRaw?.split(";") || [];
-          const contentType = contentTypes.length ? contentTypes[0] : undefined;
-
-          dispatch(
-            updateCurrentDocument({
-              ...currentDocument,
-              fileType: contentType || undefined,
-            }),
-          );
-        })
-        .catch((error) => {
-          if (error?.name !== "AbortError") {
-            throw error;
-          }
-        });
-
-      return () => {
-        controller.abort();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentFileNo, documentURI, currentDocument],
-  );
-
   useEffect(() => {
     if (!currentDocument || CurrentRenderer === undefined) return;
 
